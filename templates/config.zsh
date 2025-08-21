@@ -10,6 +10,8 @@ fi
 # Source/Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
+PATH="$PATH:$HOME/.local/bin"
+
 eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/zen.toml)"
 
 # Plugins
@@ -70,8 +72,6 @@ alias l='ls -lah'
 alias la='ls -lAh'
 alias ll='ls -lh'
 alias lsa='ls -lah'
-
-PATH="$PATH:$HOME/.local/bin"
 
 # Fzf shell integration
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
