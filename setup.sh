@@ -118,7 +118,7 @@ fi
 if ! command -v oh-my-posh &> /dev/null; then
     echo "📦 Installing oh-my-posh..."
     if [[ "$OS" == "linux" ]]; then
-        curl -s https://ohmyposh.dev/install.sh | bash -s &> /dev/null
+        curl -s https://ohmyposh.dev/install.sh | bash -s
     else
         brew install jandedobbeleer/oh-my-posh/oh-my-posh
     fi
