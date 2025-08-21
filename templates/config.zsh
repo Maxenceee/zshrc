@@ -71,6 +71,8 @@ alias la='ls -lAh'
 alias ll='ls -lh'
 alias lsa='ls -lah'
 
+PATH="$PATH:$HOME/.local/bin"
+
 # Fzf shell integration
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
