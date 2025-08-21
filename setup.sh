@@ -3,6 +3,8 @@ set -e
 
 echo "🚀 Setting up Zsh environment..."
 
+template_path="./templates"
+
 # ------------------------
 # 1. Détection OS
 # ------------------------
@@ -137,7 +139,7 @@ if [ -f ~/.zshrc ]; then
     fi
 fi
 
-cp ./config.zsh ~/.zshrc
+cp $template_path/config.zsh ~/.zshrc
 echo "✅ Copied new Zsh configuration."
 
 # ------------------------
@@ -158,7 +160,7 @@ if [ -f "$CONFIG_DIR/zen.toml" ]; then
     fi
 fi
 
-cp ./zen.toml "$CONFIG_DIR/zen.toml"
+cp $template_path/zen.toml "$CONFIG_DIR/zen.toml"
 echo "✅ Added oh-my-posh theme to $CONFIG_DIR/zen.toml"
 
 # ------------------------

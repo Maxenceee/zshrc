@@ -41,11 +41,21 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
   overflow = 'hidden'
 
   [[blocks.segments]]
+    type = 'executiontime'
+    style = 'plain'
+    background = 'transparent'
+    foreground = 'yellow'
+    template = '{{ .FormattedMs }}'
+
+    [blocks.segments.properties]
+      threshold = 5000
+
+  [[blocks.segments]]
     type = 'python'
     style = 'plain'
     background = 'transparent'
     foreground = 'p:python'
-    template = '  {{ if .Venv }}({{ .Venv }}) {{ end }}{{ .Full }} '
+    template = '  {{ if .Venv }}({{ .Venv }}) {{ end }}{{ .Full }}'
 
     [blocks.segments.properties]
       display_mode = 'context'
@@ -55,20 +65,16 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
     style = 'plain'
     background = 'transparent'
     foreground = '#68A063'
-    template = '  {{ .Full }} '
+    template = '  {{ .Full }}'
 
     [blocks.segments.properties]
       display_mode = 'context'
 
   [[blocks.segments]]
-    type = 'executiontime'
+    type = "session"
     style = 'plain'
     background = 'transparent'
-    foreground = 'yellow'
-    template = '{{ .FormattedMs }}'
-
-    [blocks.segments.properties]
-      threshold = 5000
+    template = ' {{ if .SSHSession }}{{ .UserName }}@{{ .HostName }}{{ end }}'
 
 [[blocks]]
   type = 'prompt'
