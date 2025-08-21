@@ -1,66 +1,97 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -e
 
-echo "Setting up zsh configuration..."
+echo "🚀 Setting up Zsh environment..."
 
-if [ -f ~/.zshrc ]; then
-    mv ~/.zshrc ~/.zshrc.old
+# ------------------------
+# 1. Vérification de l'OS
+# ------------------------
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    OS="macos"
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    OS="linux"
+else
+    echo "❌ Unsupported OS: $OSTYPE"
+    exit 1
 fi
 
-cp ./config.zsh ~/.zshrc
-
-# Vérification de l'installation de fzf
-if ! command -v fzf &> /dev/null; then
-
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Installation sur Linux avec apt
+# ------------------------
+# 2. Vérification des prérequis
+# ------------------------
+install_package() {
+    local pkg=$1
+    if [[ "$OS" == "linux" ]]; then
         if command -v apt &> /dev/null; then
-            sudo apt update && sudo apt install -y fzf
+            sudo apt update && sudo apt install -y "$pkg"
         else
-            echo "apt not installed. Could not install fzf."
-            exit 1
+            echo "❌ No supported package manager found. Install $pkg manually."
         fi
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # Installation sur macOS avec Homebrew
-        if command -v brew &> /dev/null; then
-            brew install fzf
+    elif [[ "$OS" == "macos" ]]; then
+        if ! command -v brew &> /dev/null; then
+            read -p "🍺 Homebrew is not installed. Install it now? (y/n): " yn
+            if [[ "$yn" == "y" ]]; then
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            else
+                echo "⚠️ Skipping Homebrew installation. Some packages might be missing."
+                return
+            fi
+        fi
+        brew install "$pkg"
+    fi
+}
+
+echo "✅ Checking and installing prerequisites..."
+for pkg in zsh git curl wget fzf; do
+    if ! command -v "$pkg" &> /dev/null; then
+        echo "📦 $pkg is missing."
+        read -p "Install $pkg? (y/n): " yn
+        if [[ "$yn" == "y" ]]; then
+            install_package "$pkg"
         else
-            echo "Homebrew not installed. Could not install fzf."
-            exit 1
+            echo "⚠️ Skipping $pkg installation."
+        fi
+    fi
+done
+
+# ------------------------
+# 3. Installation de oh-my-posh
+# ------------------------
+if ! command -v oh-my-posh &> /dev/null; then
+    read -p "📦 oh-my-posh not installed. Install now? (y/n): " yn
+    if [[ "$yn" == "y" ]]; then
+        if [[ "$OS" == "linux" ]]; then
+            curl -s https://ohmyposh.dev/install.sh | bash -s
+        else
+            brew install jandedobbeleer/oh-my-posh/oh-my-posh
         fi
     else
-        echo "Unknown os"
-        exit 1
+        echo "⚠️ Skipping oh-my-posh installation."
     fi
 fi
 
-source ~/.zshrc
+# ------------------------
+# 4. Sauvegarde de l'ancienne config et copie de la nouvelle
+# ------------------------
+if [ -f ~/.zshrc ]; then
+    read -p "⚠️ .zshrc exists. Backup and replace it? (y/n): " yn
+    if [[ "$yn" == "y" ]]; then
+        mv ~/.zshrc ~/.zshrc.old
+        echo "📂 Backed up to ~/.zshrc.old"
+    else
+        echo "⏭ Skipping .zshrc replacement."
+        exit 0
+    fi
+fi
 
-echo "Configuration... done"
+cp ./config.zsh ~/.zshrc
+echo "✅ Copied new Zsh configuration."
 
-exec zsh
-
-# echo -n "Do you want to close this terminal and open a new one with the new configuration? (y/n) "
-# read reponse
-
-# if [[ "$reponse" == "y" || "$reponse" == "Y" ]]; then
-    
-#     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-#         # Ouvre un nouveau terminal pour Linux
-#         if command -v gnome-terminal &> /dev/null; then
-#             gnome-terminal
-#         elif command -v xterm &> /dev/null; then
-#             xterm
-#         elif command -v konsole &> /dev/null; then
-#             konsole
-#         else
-#             echo "Aucun terminal compatible trouvé."
-#         fi
-#     elif [[ "$OSTYPE" == "darwin"* ]]; then
-#         # Ouvre un nouveau terminal pour macOS
-#         open -a Terminal
-#     else
-#         echo "Unknown os"
-#     fi
-
-#     kill -9 $PPID
-# fi
+# ------------------------
+# 5. Recharger la config
+# ------------------------
+read -p "Reload Zsh now? (y/n): " yn
+if [[ "$yn" == "y" ]]; then
+    exec zsh
+else
+    echo "✅ Installation complete. Restart your terminal to apply changes."
+fi
