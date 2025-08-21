@@ -64,6 +64,15 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu no
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 
+# Syntax highlighting customization
+ZSH_HIGHLIGHT_STYLES[suffix-alias]=fg=white,underline
+ZSH_HIGHLIGHT_STYLES[precommand]=fg=standout
+ZSH_HIGHLIGHT_STYLES[arg0]=fg=standout
+ZSH_HIGHLIGHT_STYLES[path]=none
+ZSH_HIGHLIGHT_STYLES[path_prefix]=none
+ZSH_HIGHLIGHT_STYLES[autodirectory]=fg=blue
+ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]=fg=green
+
 # Aliases
 alias help=run-help
 
@@ -76,6 +85,7 @@ alias lsa='ls -lah'
 # Fzf shell integration
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# Import local config
 if [[ -f ~/.zshrc.local ]]; then
 	source ~/.zshrc.local
 fi
