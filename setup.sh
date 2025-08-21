@@ -4,7 +4,7 @@ set -e
 echo "🚀 Setting up Zsh environment..."
 
 # ------------------------
-# 1. Vérification de l'OS
+# 1. Détection OS
 # ------------------------
 if [[ "$OSTYPE" == "darwin"* ]]; then
     OS="macos"
@@ -16,20 +16,31 @@ else
 fi
 
 # ------------------------
-# 2. Vérification des prérequis
+# 2. Fonction installation
 # ------------------------
 install_package() {
     local pkg=$1
+    local SUDO=""
+
+    if [[ $EUID -ne 0 ]]; then
+        if command -v sudo &> /dev/null; then
+            SUDO="sudo"
+        else
+            echo "⚠️ Not root and sudo not found. Trying to install without privileges..."
+        fi
+    fi
+
     if [[ "$OS" == "linux" ]]; then
         if command -v apt &> /dev/null; then
-            sudo apt update && sudo apt install -y "$pkg"
+            $SUDO apt update && $SUDO apt install -y "$pkg"
         else
             echo "❌ No supported package manager found. Install $pkg manually."
         fi
     elif [[ "$OS" == "macos" ]]; then
         if ! command -v brew &> /dev/null; then
-            read -p "🍺 Homebrew is not installed. Install it now? (y/n): " yn
-            if [[ "$yn" == "y" ]]; then
+            read -p "🍺 Homebrew not installed. Install it now? (Y/n): " yn
+            yn=${yn:-Y}
+            if [[ "$yn" =~ ^[Yy]$ ]]; then
                 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
             else
                 echo "⚠️ Skipping Homebrew installation. Some packages might be missing."
@@ -40,43 +51,86 @@ install_package() {
     fi
 }
 
-echo "✅ Checking and installing prerequisites..."
-for pkg in zsh git curl wget fzf; do
-    if ! command -v "$pkg" &> /dev/null; then
-        echo "📦 $pkg is missing."
-        read -p "Install $pkg? (y/n): " yn
-        if [[ "$yn" == "y" ]]; then
-            install_package "$pkg"
+install_fzf() {
+    if command -v brew &> /dev/null; then
+        echo "📦 Installing fzf via Homebrew..."
+        brew install fzf
+    else
+        local FZF_DIR="$HOME/.fzf"
+        if [ ! -d "$FZF_DIR" ]; then
+            echo "📦 Installing fzf from official repo..."
+            git clone --depth 1 https://github.com/junegunn/fzf.git "$FZF_DIR"
+            "$FZF_DIR/install" --all
         else
-            echo "⚠️ Skipping $pkg installation."
+            echo "✅ fzf already installed in $FZF_DIR"
         fi
+    fi
+}
+
+# ------------------------
+# 3. Prérequis (installation automatique)
+# ------------------------
+PREREQ_PKGS=(zsh git curl wget unzip)
+
+# Vérifier quels paquets manquent
+MISSING_PKGS=()
+for pkg in "${PREREQ_PKGS[@]}"; do
+    if ! command -v "$pkg" &> /dev/null; then
+        MISSING_PKGS+=("$pkg")
     fi
 done
 
+if [ ${#MISSING_PKGS[@]} -gt 0 ]; then
+    echo "Les paquets suivants sont nécessaires mais manquants : ${MISSING_PKGS[*]}"
+    read -p "Voulez-vous les installer maintenant ? (Y/n) " yn
+    yn=${yn:-Y}
+    if [[ "$yn" =~ ^[Yy]$ ]]; then
+        for pkg in "${MISSING_PKGS[@]}"; do
+            echo "📦 Installation de $pkg..."
+            install_package "$pkg"
+        done
+    else
+        echo "⚠️ Certains paquets nécessaires ne sont pas installés. Le script peut ne pas fonctionner correctement."
+    fi
+else
+    echo "✅ Tous les paquets prérequis sont déjà installés."
+fi
+
+if ! command -v fzf &> /dev/null; then
+    install_fzf
+fi
+
 # ------------------------
-# 3. Installation de oh-my-posh
+# 4. Zinit (auto)
+# ------------------------
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+if [ ! -d "$ZINIT_HOME" ]; then
+    echo "📦 Installing Zinit..."
+    mkdir -p "$(dirname "$ZINIT_HOME")"
+    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+fi
+
+# ------------------------
+# 5. Oh-my-posh (auto)
 # ------------------------
 if ! command -v oh-my-posh &> /dev/null; then
-    read -p "📦 oh-my-posh not installed. Install now? (y/n): " yn
-    if [[ "$yn" == "y" ]]; then
-        if [[ "$OS" == "linux" ]]; then
-            curl -s https://ohmyposh.dev/install.sh | bash -s
-        else
-            brew install jandedobbeleer/oh-my-posh/oh-my-posh
-        fi
+    echo "📦 Installing oh-my-posh..."
+    if [[ "$OS" == "linux" ]]; then
+        curl -s https://ohmyposh.dev/install.sh | bash -s &> /dev/null
     else
-        echo "⚠️ Skipping oh-my-posh installation."
+        brew install jandedobbeleer/oh-my-posh/oh-my-posh
     fi
 fi
 
 # ------------------------
-# 4. Sauvegarde de l'ancienne config et copie de la nouvelle
+# 6. Sauvegarde .zshrc
 # ------------------------
 if [ -f ~/.zshrc ]; then
-    read -p "⚠️ .zshrc exists. Backup and replace it? (y/n): " yn
-    if [[ "$yn" == "y" ]]; then
-        mv ~/.zshrc ~/.zshrc.old
-        echo "📂 Backed up to ~/.zshrc.old"
+    read -p "⚠️ .zshrc exists. Backup and replace it? (Y/n): " yn
+    yn=${yn:-Y}
+    if [[ "$yn" =~ ^[Yy]$ ]]; then
+        mv ~/.zshrc ~/.zshrc.pre-omp
+        echo "📂 Backed up to ~/.zshrc.pre-omp"
     else
         echo "⏭ Skipping .zshrc replacement."
         exit 0
@@ -87,11 +141,28 @@ cp ./config.zsh ~/.zshrc
 echo "✅ Copied new Zsh configuration."
 
 # ------------------------
-# 5. Recharger la config
+# 7. Ajout du thème oh-my-posh (zen.toml)
 # ------------------------
-read -p "Reload Zsh now? (y/n): " yn
-if [[ "$yn" == "y" ]]; then
-    exec zsh
-else
-    echo "✅ Installation complete. Restart your terminal to apply changes."
+CONFIG_DIR="$HOME/.config/ohmyposh"
+mkdir -p "$CONFIG_DIR"
+
+if [ -f "$CONFIG_DIR/zen.toml" ]; then
+    read -p "⚠️ zen.toml exists. Backup and replace it? (Y/n): " yn
+    yn=${yn:-Y}
+    if [[ "$yn" =~ ^[Yy]$ ]]; then
+        mv "$CONFIG_DIR/zen.toml" "$CONFIG_DIR/zen.toml.old"
+        echo "📂 Backed up old zen.toml to zen.toml.old"
+    else
+        echo "⏭ Skipping zen.toml replacement."
+        exit 0
+    fi
 fi
+
+cp ./zen.toml "$CONFIG_DIR/zen.toml"
+echo "✅ Added oh-my-posh theme to $CONFIG_DIR/zen.toml"
+
+# ------------------------
+# 8. Rechargement automatique
+# ------------------------
+echo "🔄 Reloading Zsh..."
+exec zsh

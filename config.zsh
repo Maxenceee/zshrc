@@ -21,7 +21,9 @@ zinit light Aloxaf/fzf-tab
 zinit light MichaelAquilina/zsh-you-should-use
 zinit light wfxr/forgit
 # zinit light unixorn/git-extra-commands
-zinit light djui/alias-tips
+if command -v python &>/dev/null || command -v python3 &>/dev/null; then
+	zinit light djui/alias-tips
+fi
 zinit light hlissner/zsh-autopair
 
 # Add in snippets
@@ -70,25 +72,7 @@ alias ll='ls -lh'
 alias lsa='ls -lah'
 
 # Fzf shell integration
-eval "$(fzf --zsh)"
-
-# Global options for fzf
-export FZF_DEFAULT_OPTS="--height=80% --layout=reverse --border --info=inline"
-
-# Default commands for file and content search
-export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git"
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_ALT_C_COMMAND="fd --type d --hidden --follow --exclude .git"
-
-# File preview
-export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {}'"
-
-# Directory navigation preview
-export FZF_ALT_C_OPTS="--preview 'ls --color=always {}'"
-
-export FORGIT_FZF_DEFAULT_OPTS="--height=80% --layout=reverse --border"
-export FORGIT_LOG_FORMAT="%C(auto)%h%d %s %C(blue)%cr %C(green)%an"
-export FORGIT_FZF_PREVIEW='bat --style=plain --color=always {}'
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 if [[ -f ~/.zshrc.local ]]; then
 	source ~/.zshrc.local
