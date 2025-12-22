@@ -164,7 +164,28 @@ cp $template_path/zen.toml "$CONFIG_DIR/zen.toml"
 echo "✅ Added oh-my-posh theme to $CONFIG_DIR/zen.toml"
 
 # ------------------------
-# 8. Rechargement automatique
+# 8. Changement de shell par défaut
+# ------------------------
+if [[ command -v dscl &> /dev/null  ]]; then
+	DEFAULT_SHELL=$(dscl . -read /Users/"$USER" UserShell | awk '{print $2}')
+else
+	DEFAULT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
+fi
+
+if [[ DEFAULT_SHELL != "zsh"* ]]; then
+	read -p "❓ Your default shell is currently: $DEFAULT_SHELL do you want to change it to Zsh? (Y/n): " yn
+	yn=${yn:-Y}
+	if [[ "$yn" =~ ^[Yy]$ ]]; then
+		chsh -s /bin/zsh
+		echo "✅ Default shell changed to Zsh."
+		echo Note: This change will take effect on your next login.
+	else
+		echo "⏭ Skipping shell change."
+	fi
+fi
+
+# ------------------------
+# 9. Rechargement automatique
 # ------------------------
 echo "🔄 Reloading Zsh..."
 exec zsh
