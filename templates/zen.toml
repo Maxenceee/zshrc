@@ -89,7 +89,7 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
       "{{if gt .Code 0}}red{{end}}",
       "{{if eq .Code 0}}magenta{{end}}",
     ]
-    template = '❯'
+    template = '{{ if .SSHSession }}{{ .UserName }} {{ end }}❯'
 
 [transient_prompt]
   background = 'transparent'
