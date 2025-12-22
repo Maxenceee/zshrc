@@ -18,7 +18,7 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
     style = 'plain'
     background = 'transparent'
     foreground = 'blue'
-    template = ' {{ if .SSHSession }}{{ .Env.USER }}:{{ end }}{{ .Path }}'
+    template = ' {{ if .SSHSession }}{{ .UserName }}:{{ end }}{{ .Path }}'
 
     [blocks.segments.properties]
       style = 'full'
