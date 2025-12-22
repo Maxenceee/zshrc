@@ -18,7 +18,7 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
     style = 'plain'
     background = 'transparent'
     foreground = 'blue'
-    template = '{{ .Path }}'
+    template = ' {{ if .SSHSession }}{{ .Env.USER }}:{{ end }}{{ .Path }}'
 
     [blocks.segments.properties]
       style = 'full'
@@ -89,7 +89,7 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
       "{{if gt .Code 0}}red{{end}}",
       "{{if eq .Code 0}}magenta{{end}}",
     ]
-    template = '{{ if .SSHSession }}{{ .UserName }} {{ end }}❯'
+    template = '❯'
 
 [transient_prompt]
   background = 'transparent'
