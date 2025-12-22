@@ -183,7 +183,6 @@ if [[ "$DEFAULT_SHELL" != *"zsh" ]]; then
 		echo "⏭ Skipping shell change."
 	fi
 fi
-fi
 
 # ------------------------
 # 9. Rechargement automatique
