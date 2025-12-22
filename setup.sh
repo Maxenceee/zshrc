@@ -172,7 +172,7 @@ else
     DEFAULT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
 fi
 
-if [[ DEFAULT_SHELL != "zsh"* ]]; then
+if [[ $DEFAULT_SHELL != "zsh"* ]]; then
 	read -p "❓ Your default shell is currently: $DEFAULT_SHELL do you want to change it to Zsh? (Y/n): " yn
 	yn=${yn:-Y}
 	if [[ "$yn" =~ ^[Yy]$ ]]; then
