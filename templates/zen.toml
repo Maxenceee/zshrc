@@ -14,11 +14,17 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
   newline = true
 
   [[blocks.segments]]
+    type = "session"
+    style = 'plain'
+    background = 'transparent'
+    template = ' {{ if .SSHSession }}{{ .Env.USER }}{{ end }}'
+
+  [[blocks.segments]]
     type = 'path'
     style = 'plain'
     background = 'transparent'
     foreground = 'blue'
-    template = ' {{ if .SSHSession }}{{ .UserName }}:{{ end }}{{ .Path }}'
+    template = ' {{ .Path }}'
 
     [blocks.segments.properties]
       style = 'full'
