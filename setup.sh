@@ -172,16 +172,17 @@ else
     DEFAULT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
 fi
 
-if [[ $DEFAULT_SHELL != "zsh"* ]]; then
-	read -p "❓ Your default shell is currently: $DEFAULT_SHELL do you want to change it to Zsh? (Y/n): " yn
+if [[ "$DEFAULT_SHELL" != *"zsh" ]]; then
+	read -p "❓ Your default shell is currently: $DEFAULT_SHELL. Do you want to change it to Zsh? (Y/n): " yn
 	yn=${yn:-Y}
 	if [[ "$yn" =~ ^[Yy]$ ]]; then
-		chsh -s /bin/zsh
+		chsh -s "$(command -v zsh)"
 		echo "✅ Default shell changed to Zsh."
-		echo Note: This change will take effect on your next login.
+		echo "Note: This change will take effect on your next login."
 	else
 		echo "⏭ Skipping shell change."
 	fi
+fi
 fi
 
 # ------------------------
