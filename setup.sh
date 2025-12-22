@@ -166,10 +166,10 @@ echo "✅ Added oh-my-posh theme to $CONFIG_DIR/zen.toml"
 # ------------------------
 # 8. Changement de shell par défaut
 # ------------------------
-if [[ command -v dscl &> /dev/null  ]]; then
-	DEFAULT_SHELL=$(dscl . -read /Users/"$USER" UserShell | awk '{print $2}')
+if [[ $(command -v dscl &> /dev/null) ]]; then
+    DEFAULT_SHELL=$(dscl . -read /Users/"$USER" UserShell | awk '{print $2}')
 else
-	DEFAULT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
+    DEFAULT_SHELL=$(getent passwd "$USER" | cut -d: -f7)
 fi
 
 if [[ DEFAULT_SHELL != "zsh"* ]]; then
