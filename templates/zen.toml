@@ -14,12 +14,6 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
   newline = true
 
   [[blocks.segments]]
-    type = "session"
-    style = 'plain'
-    background = 'transparent'
-    template = '{{ if .SSHSession }}{{ .Env.USER }}:{{ else }} {{ end }}'
-
-  [[blocks.segments]]
     type = 'path'
     style = 'plain'
     background = 'transparent'
